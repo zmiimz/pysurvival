@@ -450,7 +450,7 @@ class NonLinearCoxPHModel(BaseModel):
     def fit(self, X, T, E, init_method='glorot_uniform',
             optimizer='adam', lr=1e-4, num_epochs=1000,
             dropout=0.2, batch_normalization=False, bn_and_dropout=False,
-            l2_reg=1e-5, verbose=True):
+            l2_reg=1e-5, verbose=True, seed=None):
         """ 
         Fit the estimator based on the given parameters.
 
@@ -514,6 +514,9 @@ class NonLinearCoxPHModel(BaseModel):
 
         * `verbose`: **bool** *(default=True)* -- 
             Whether or not producing detailed logging about the modeling
+
+        * `seed`: **int** *(default=None)* --
+            Seed for random number generator
                 
 
         Example:
@@ -604,7 +607,7 @@ class NonLinearCoxPHModel(BaseModel):
         # Initializing the model
         model = nn.NeuralNet(input_shape, 1, self.structure,
                              init_method, dropout, batch_normalization,
-                             bn_and_dropout)
+                             bn_and_dropout, seed)
 
         # Looping through the data to calculate the loss
         X = torch.FloatTensor(X_original)

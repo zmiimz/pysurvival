@@ -194,7 +194,7 @@ class BaseMultiTaskModel(BaseModel):
     def fit(self, X, T, E, init_method='glorot_uniform', optimizer='adam',
             lr=1e-4, num_epochs=1000, dropout=None, l2_reg=1e-2,
             l2_smooth=1e-2, batch_normalization=False, bn_and_dropout=False,
-            verbose=True, extra_pct_time=0.1, is_min_time_zero=True):
+            verbose=True, extra_pct_time=0.1, is_min_time_zero=True, seed=None):
         """ Fit the estimator based on the given parameters.
 
         Parameters:
@@ -270,6 +270,9 @@ class BaseMultiTaskModel(BaseModel):
 
         * `is_min_time_zero`: **bool** *(default=True)* -- 
             Whether the the time axis starts at 0
+
+        * `seed`: **int** *(default=None)* --
+            Seed for random number generator
 
         **Returns:**
 
@@ -354,7 +357,7 @@ class BaseMultiTaskModel(BaseModel):
         # Initializing the model
         model = nn.NeuralNet(input_shape, self.num_times, self.structure,
                              init_method, dropout, batch_normalization,
-                             bn_and_dropout)
+                             bn_and_dropout, seed)
 
         # Creating the Triangular matrix
         Triangle = np.tri(self.num_times, self.num_times + 1, dtype=np.float32)
@@ -478,13 +481,14 @@ class LinearMultiTaskModel(BaseMultiTaskModel):
     def fit(self, X, T, E, init_method='glorot_uniform', optimizer='adam',
             lr=1e-4, num_epochs=1000, dropout=0.2, l2_reg=1e-2,
             l2_smooth=1e-2, batch_normalization=False, bn_and_dropout=False,
-            verbose=True, extra_pct_time=0.1, is_min_time_zero=True):
+            verbose=True, extra_pct_time=0.1, is_min_time_zero=True, seed=None):
         super(LinearMultiTaskModel, self).fit(X=X, T=T, E=E,
                                               init_method=init_method, optimizer=optimizer,
                                               lr=lr, num_epochs=num_epochs, dropout=None, l2_reg=l2_reg,
                                               l2_smooth=l2_smooth, batch_normalization=False,
                                               bn_and_dropout=False, verbose=verbose,
-                                              extra_pct_time=extra_pct_time, is_min_time_zero=is_min_time_zero)
+                                              extra_pct_time=extra_pct_time, is_min_time_zero=is_min_time_zero,
+                                              seed=seed)
 
         return self
 

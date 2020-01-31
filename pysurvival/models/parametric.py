@@ -91,7 +91,7 @@ class BaseParametricModel(BaseModel):
 
     def fit(self, X, T, E, init_method='glorot_uniform', optimizer='adam',
             lr=1e-4, num_epochs=1000, l2_reg=1e-2, verbose=True,
-            is_min_time_zero=True, extra_pct_time=0.1):
+            is_min_time_zero=True, extra_pct_time=0.1, seed=None):
         """ 
         Fit the estimator based on the given parameters.
 
@@ -151,6 +151,9 @@ class BaseParametricModel(BaseModel):
 
         * `is_min_time_zero`: **bool** *(default=True)* -- 
             Whether the the time axis starts at 0
+
+        * `seed`: **int** *(default=None)* --
+            Seed for random number generator
 
         Returns:
         --------
@@ -239,7 +242,7 @@ class BaseParametricModel(BaseModel):
 
         # Initializing the model
         model = nn.ParametricNet(input_shape, init_method, init_alpha,
-                                 is_beta_used)
+                                 is_beta_used, seed)
 
         # Trasnforming the inputs into tensors
         X = torch.FloatTensor(X)
