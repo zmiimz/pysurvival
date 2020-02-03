@@ -1,199 +1,213 @@
-import torch 
+import torch
 import torch.nn as nn
 import numpy as np
 import pysurvival.utils.optimization as opt
+
 
 # --------------------------- Activation Functions --------------------------- #
 class Swish(nn.Module):
     def forward(self, x):
         return x * torch.sigmoid(x)
 
+
 class Gaussian(nn.Module):
     def forward(self, x):
-        return torch.exp(- x*x/2.)
-    
+        return torch.exp(- x * x / 2.)
+
+
 class Atan(nn.Module):
     def forward(self, x):
         return torch.atan(x)
 
+
 class InverseSqrt(nn.Module):
     def forward(self, x, alpha=1.):
-        return x/torch.sqrt(1.+alpha*x*x)
-    
+        return x / torch.sqrt(1. + alpha * x * x)
+
+
 class Sinc(nn.Module):
     def forward(self, x, epsilon=1e-9):
-        return torch.sin(x+epsilon)/(x+epsilon)
-    
+        return torch.sin(x + epsilon) / (x + epsilon)
+
+
 class SinReLU(nn.Module):
     def forward(self, x):
-        return torch.sin(x)+torch.relu(x)
+        return torch.sin(x) + torch.relu(x)
+
 
 class CosReLU(nn.Module):
     def forward(self, x):
-        return torch.cos(x)+torch.relu(x)
+        return torch.cos(x) + torch.relu(x)
+
 
 class LeCunTanh(nn.Module):
     def forward(self, x):
-        return 1.7159*torch.tanh(2./3*x)
-           
+        return 1.7159 * torch.tanh(2. / 3 * x)
+
+
 class LogLog(nn.Module):
     def forward(self, x):
-        return 1.-torch.exp(-torch.exp(x))
-    
+        return 1. - torch.exp(-torch.exp(x))
+
+
 class BipolarSigmoid(nn.Module):
     def forward(self, x):
-        return (1.-torch.exp(-x))/(1.+torch.exp(-x)) 
-    
+        return (1. - torch.exp(-x)) / (1. + torch.exp(-x))
+
+
 class BentIdentity(nn.Module):
     def forward(self, x, alpha=1.):
-        return x + (torch.sqrt(1.+ x*x)- 1.)/2.
+        return x + (torch.sqrt(1. + x * x) - 1.) / 2.
+
 
 class Identity(nn.Module):
     def forward(self, x):
-        return x 
+        return x
+
 
 class Softmax(nn.Module):
     def forward(self, x):
         y = torch.exp(x)
-        return y/torch.sum(y, dim=0)
-    
+        return y / torch.sum(y, dim=0)
+
+
 def activation_function(activation, alpha=1., return_text=False):
     """ Returns the activation function object used by the network """
-    
+
     if activation.lower() == 'atan':
-        if return_text :
+        if return_text:
             return 'Atan'
         else:
             return Atan()
-    
+
     elif activation.lower().startswith('bent'):
-        if return_text :
+        if return_text:
             return 'BentIdentity'
         else:
             return BentIdentity()
 
     elif activation.lower().startswith('bipolar'):
-        if return_text :
+        if return_text:
             return 'BipolarSigmoid'
         else:
             return BipolarSigmoid()
-    
+
     elif activation.lower().startswith('cosrelu'):
-        if return_text :
+        if return_text:
             return 'CosReLU'
         else:
-            return CosReLU()    
-    
+            return CosReLU()
+
     elif activation.lower() == 'elu':
-        if return_text :
+        if return_text:
             return 'ELU'
         else:
             return nn.ELU(alpha=alpha)
-    
+
     elif activation.lower() == 'gaussian':
-        if return_text :
+        if return_text:
             return 'Gaussian'
         else:
             return Gaussian()
-        
+
     elif activation.lower() == 'hardtanh':
-        if return_text :
+        if return_text:
             return 'Hardtanh'
         else:
             return nn.Hardtanh()
-    
+
     elif activation.lower() == 'identity':
-        if return_text :
+        if return_text:
             return 'Identity'
         else:
             return Identity()
-    
+
     elif activation.lower().startswith('inverse'):
-        if return_text :
+        if return_text:
             return 'InverseSqrt'
         else:
-            return InverseSqrt()    
-        
+            return InverseSqrt()
+
     elif activation.lower() == 'leakyrelu':
-        if return_text :
+        if return_text:
             return 'LeakyReLU'
         else:
             return nn.LeakyReLU()
-    
+
     elif activation.lower().startswith('lecun'):
-        if return_text :
+        if return_text:
             return 'LeCunTanh'
         else:
-            return LeCunTanh()    
-    
+            return LeCunTanh()
+
     elif activation.lower() == 'loglog':
-        if return_text :
+        if return_text:
             return 'LogLog'
         else:
             return LogLog()
-    
+
     elif activation.lower() == 'logsigmoid':
-        if return_text :
+        if return_text:
             return 'LogSigmoid'
         else:
-            return nn.LogSigmoid()    
-    
+            return nn.LogSigmoid()
+
     elif activation.lower() == 'relu':
-        if return_text :
+        if return_text:
             return 'ReLU'
         else:
             return nn.ReLU()
-        
+
     elif activation.lower() == 'selu':
-        if return_text :
+        if return_text:
             return 'SELU'
         else:
             return nn.SELU()
-    
+
     elif activation.lower() == 'sigmoid':
-        if return_text :
+        if return_text:
             return 'Sigmoid'
         else:
             return nn.Sigmoid()
-    
+
     elif activation.lower() == 'sinc':
-        if return_text :
+        if return_text:
             return 'Sinc'
         else:
             return Sinc()
-    
+
     elif activation.lower().startswith('sinrelu'):
-        if return_text :
+        if return_text:
             return 'SinReLU'
         else:
-            return SinReLU()    
-    
+            return SinReLU()
+
     elif activation.lower() == 'softmax':
-        if return_text :
+        if return_text:
             return 'Softmax'
         else:
             return Softmax()
-        
+
     elif activation.lower() == 'softplus':
-        if return_text :
+        if return_text:
             return 'Softplus'
         else:
             return nn.Softplus()
-        
+
     elif activation.lower() == 'softsign':
-        if return_text :
+        if return_text:
             return 'Softsign'
         else:
             return nn.Softsign()
-    
+
     elif activation.lower() == 'swish':
-        if return_text :
+        if return_text:
             return 'Swish'
         else:
             return Swish()
-        
+
     elif activation.lower() == 'tanh':
-        if return_text :
+        if return_text:
             return 'Tanh'
         else:
             return nn.Tanh()
@@ -203,10 +217,8 @@ def activation_function(activation, alpha=1., return_text=False):
         raise NotImplementedError(error)
 
 
-
 def check_mlp_structure(structure):
     """ Checking that the given MLP structure is valid """
-
 
     # Checking if structure is dict
     if isinstance(structure, dict):
@@ -219,8 +231,8 @@ def check_mlp_structure(structure):
         # Checking the validity of activation
         activation = inner_structure.get('activation')
         if activation is None:
-            error = 'An activation function needs to be provided ' 
-            error +='using the key "activation"'
+            error = 'An activation function needs to be provided '
+            error += 'using the key "activation"'
             raise KeyError(error)
 
         else:
@@ -230,8 +242,8 @@ def check_mlp_structure(structure):
         # Checking the validity of num_units
         num_units = inner_structure.get('num_units')
         if num_units is None:
-            error = 'The number of hidden units needs to be provided ' 
-            error +='using the key "num_units"'
+            error = 'The number of hidden units needs to be provided '
+            error += 'using the key "num_units"'
             raise KeyError(error)
 
         else:
@@ -313,9 +325,10 @@ class NeuralNet(nn.Module):
       Internal Covariate Shift BN should appear after Fully connected but 
       before activation according to : https://arxiv.org/pdf/1502.03167.pdf
 
-    """    
+    """
+
     def __init__(self, input_size, output_size, structure, init_method
-        , dropout=None, batch_normalization = True, bn_and_droupout = False):
+                 , dropout=None, batch_normalization=True, bn_and_droupout=False):
 
         # Initializing the model
         super(NeuralNet, self).__init__()
@@ -334,56 +347,56 @@ class NeuralNet(nn.Module):
 
                 # Extracting the hidden layer parameters 
                 hidden_size = int(hidden.get('num_units'))
-                activation  = hidden.get('activation')
-                alpha       = hidden.get('alpha')
+                activation = hidden.get('activation')
+                alpha = hidden.get('alpha')
 
                 # Fully connected layer
-                fully_conn = nn.Linear(input_size, hidden_size) 
-                fully_conn.weight = opt.initialization(init_method, 
-                    fully_conn.weight)
-                fully_conn.bias = opt.initialization(init_method, 
-                    fully_conn.bias)
-                self.layers.append( fully_conn )
-                
+                fully_conn = nn.Linear(input_size, hidden_size)
+                fully_conn.weight = opt.initialization(init_method,
+                                                       fully_conn.weight)
+                fully_conn.bias = opt.initialization(init_method,
+                                                     fully_conn.bias)
+                self.layers.append(fully_conn)
+
                 if not bn_and_droupout:
                     # Batch Normalization
                     if batch_normalization:
-                        self.layers.append( torch.nn.BatchNorm1d(hidden_size) )
+                        self.layers.append(torch.nn.BatchNorm1d(hidden_size))
 
                     # Activation
-                    self.layers.append( activation_function(activation, 
-                        alpha=alpha) )
-                    
+                    self.layers.append(activation_function(activation,
+                                                           alpha=alpha))
+
                     # Dropout
-                    if (dropout is not None or 0. < dropout <= 1.) and \
-                    not batch_normalization :
-                        self.layers.append( torch.nn.Dropout(dropout) )
+                    if dropout is not None:
+                        if dropout <= 1. and not batch_normalization:
+                            self.layers.append(torch.nn.Dropout(dropout))
 
                 else:
                     # Batch Normalization
                     if batch_normalization:
-                        self.layers.append( torch.nn.BatchNorm1d(hidden_size) )
+                        self.layers.append(torch.nn.BatchNorm1d(hidden_size))
 
                     # Activation
-                    self.layers.append( activation_function(activation, 
-                        alpha=alpha) )
-                    
+                    self.layers.append(activation_function(activation,
+                                                           alpha=alpha))
+
                     # Dropout
-                    if (dropout is not None or 0. < dropout <= 1.) :
-                        self.layers.append( torch.nn.Dropout(dropout) )
+                    if dropout is not None:
+                        if dropout <= 1.:
+                            self.layers.append(torch.nn.Dropout(dropout))
 
                 # Next layer
                 input_size = hidden_size
 
         # Fully connected last layer
-        fully_conn = nn.Linear(input_size, output_size) 
+        fully_conn = nn.Linear(input_size, output_size)
         fully_conn.weight = opt.initialization(init_method, fully_conn.weight)
         fully_conn.bias = opt.initialization(init_method, fully_conn.bias)
-        self.layers.append( fully_conn )
+        self.layers.append(fully_conn)
 
         # Putting the model together 
         self.model = nn.Sequential(*self.layers).train()
-
 
     def forward(self, x):
 
@@ -391,27 +404,25 @@ class NeuralNet(nn.Module):
         return out
 
 
-        
 class ParametricNet(torch.nn.Module):
     """ Underlying Pytorch model powering the Parametric models """
 
-    def __init__(self, num_features, init_method, init_alpha=1., 
-        is_beta_used = True):
+    def __init__(self, num_features, init_method, init_alpha=1.,
+                 is_beta_used=True):
         super(ParametricNet, self).__init__()
 
         # weights
-        W = torch.randn(num_features, 1) 
+        W = torch.randn(num_features, 1)
         self.W = opt.initialization(init_method, W)
 
-        one =  torch.FloatTensor(np.array([1]))/init_alpha
-        self.alpha = torch.nn.Parameter( one ) 
+        one = torch.FloatTensor(np.array([1])) / init_alpha
+        self.alpha = torch.nn.Parameter(one)
 
         self.is_beta_used = is_beta_used
         if self.is_beta_used:
-            one =  torch.FloatTensor(np.array([1.001]))/init_alpha
-            self.beta = torch.nn.Parameter( one ) 
+            one = torch.FloatTensor(np.array([1.001])) / init_alpha
+            self.beta = torch.nn.Parameter(one)
 
     def forward(self, x):
-        score =  self.alpha*torch.exp(torch.matmul(x, self.W))
+        score = self.alpha * torch.exp(torch.matmul(x, self.W))
         return score
-
